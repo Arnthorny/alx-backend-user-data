@@ -35,10 +35,10 @@ def filter_datum(fields: List[str], redaction: str, message: str,
     Return:
         (:object: `str`): The log message obfuscated
     """
-    ptn = "{0}=.*?;"
-    rpl = '{0}={1};'
+    rpl = '{0}={1}{2}'
     for fld in fields:
-        message = re.sub(ptn.format(fld), rpl.format(fld, redaction), message)
+        message = re.sub("{0}=.*?{1}".format(fld, separator),
+                         rpl.format(fld, redaction, separator), message)
     return message
 
 
@@ -73,7 +73,7 @@ class RedactingFormatter(logging.Formatter):
         msg = record.getMessage()
         new_msg = filter_datum(self.flds, self.REDACTION, msg, self.SEPARATOR)
         record.__dict__['msg'] = new_msg
-        return super().format(record)
+        return super(RedactingFormatter, self).format(record)
 
 
 def get_logger() -> logging.Logger:
@@ -82,7 +82,8 @@ def get_logger() -> logging.Logger:
     logger is named "user_data" at a "logging.INFO" level
     """
 
-    logger = logging.getLogger("user_data", logging.INFO)
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
     stream_handl = logging.StreamHandler()
     r_formatter = RedactingFormatter(PII_FIELDS)
 
