@@ -69,9 +69,9 @@ class RedactingFormatter(logging.Formatter):
         super(RedactingFormatter, self).__init__(self.FORMAT)
 
     def format(self, record: logging.LogRecord) -> str:
+        """Method to filter values in incoming log records using filter_datu"""
         msg = record.getMessage()
         new_msg = filter_datum(self.flds, self.REDACTION, msg, self.SEPARATOR)
-        # new_msg.replace(self.SEPARATOR, "{} ".format(self.SEPARATOR))
         record.__dict__['msg'] = new_msg
         return super().format(record)
 
@@ -82,11 +82,12 @@ def get_logger() -> logging.Logger:
     logger is named "user_data" at a "logging.INFO" level
     """
 
-    logger = logging.Logger("user_data", logging.INFO)
+    logger = logging.getLogger("user_data", logging.INFO)
     stream_handl = logging.StreamHandler()
     r_formatter = RedactingFormatter(PII_FIELDS)
 
     stream_handl.setFormatter(r_formatter)
+    logger.propagate = False
     logger.addHandler(stream_handl)
     return logger
 
@@ -96,10 +97,10 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     Function that returns a connector to the database
     """
     arg_keys = ('user', 'password', 'host', 'database')
-    arg_vals = (os.getenv('PERSONAL_DATA_DB_USERNAME'),
-                os.getenv('PERSONAL_DATA_DB_PASSWORD'),
-                os.getenv('PERSONAL_DATA_DB_HOST'),
-                os.getenv('PERSONAL_DATA_DB_NAME'))
+    arg_vals = (os.getenv('PERSONAL_DATA_DB_USERNAME', 'root'),
+                os.getenv('PERSONAL_DATA_DB_PASSWORD', ''),
+                os.getenv('PERSONAL_DATA_DB_HOST', 'localhost'),
+                os.getenv('PERSONAL_DATA_DB_NAME', ''))
 
     conn_params = dict(zip(arg_keys, arg_vals))
     conn = mysql.connector.connect(**conn_params)
@@ -120,8 +121,8 @@ def main() -> None:
     for row in cursor:
         rowDict = dict(zip(heading, row))
         # print(rowDict)
-        msg = ';'.join('='.join((str(key), str(val))) for (key, val) in
-                       rowDict.items())
+        msg = '; '.join('='.join((str(key), str(val))) for (key, val) in
+                        rowDict.items()) + ';'
         logger.info(msg)
     cursor.close()
     db.close()
