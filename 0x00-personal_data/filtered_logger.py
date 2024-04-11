@@ -71,9 +71,9 @@ class RedactingFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Method to filter values in incoming log records using filter_datu"""
         msg = record.getMessage()
-        new_msg = filter_datum(self.flds, self.REDACTION, msg, self.SEPARATOR)
-        record.__dict__['msg'] = new_msg
-        return super(RedactingFormatter, self).format(record)
+        # record.__dict__['msg'] = new_msg
+        new_msg = super(RedactingFormatter, self).format(record)
+        return filter_datum(self.flds, self.REDACTION, new_msg, self.SEPARATOR)
 
 
 def get_logger() -> logging.Logger:
