@@ -64,15 +64,16 @@ class RedactingFormatter(logging.Formatter):
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
-    def __init__(self, fields: List[str]) -> None:
-        self.fields = fields
+    def __init__(self, fields: List[str]):
+        self.flds = fields
         super(RedactingFormatter, self).__init__(self.FORMAT)
 
     def format(self, record: logging.LogRecord) -> str:
         """Method to filter values in incoming log records using filter_datu"""
-        record.msg = filter_datum(self.fields, self.REDACTION,
-                                  record.getMessage(), self.SEPARATOR)
-        return super().format(record)
+        msg = record.getMessage()
+        # record.__dict__['msg'] = new_msg
+        new_msg = super(RedactingFormatter, self).format(record)
+        return filter_datum(self.flds, self.REDACTION, new_msg, self.SEPARATOR)
 
 
 def get_logger() -> logging.Logger:
@@ -96,12 +97,14 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     """
     Function that returns a connector to the database
     """
-    conn = mysql.connector.connect(
-        user=os.getenv("PERSONAL_DATA_DB_USERNAME", "root"),
-        password=os.getenv("PERSONAL_DATA_DB_PASSWORD", ""),
-        host=os.getenv("PERSONAL_DATA_DB_HOST", "localhost"),
-        database=os.getenv("PERSONAL_DATA_DB_NAME")
-    )
+    arg_keys = ('user', 'password', 'host', 'database')
+    arg_vals = (os.getenv('PERSONAL_DATA_DB_USERNAME', 'root'),
+                os.getenv('PERSONAL_DATA_DB_PASSWORD', ''),
+                os.getenv('PERSONAL_DATA_DB_HOST', 'localhost'),
+                os.getenv('PERSONAL_DATA_DB_NAME', ''))
+
+    conn_params = dict(zip(arg_keys, arg_vals))
+    conn = mysql.connector.connect(**conn_params)
     return conn
 
 
