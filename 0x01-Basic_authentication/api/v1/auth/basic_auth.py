@@ -63,17 +63,20 @@ class BasicAuth(Auth):
         """
         Method that returns the User instance based on his email and password.
         """
-        if type(user_email) != str:
+        if user_email is None or type(user_email) != str:
             return None
-        elif type(user_pwd) != str:
+        elif user_pwd is None or type(user_pwd) != str:
             return None
 
         attr = {'email': user_email}
-        users = User.search(attr)
+        try:
+            users = User.search(attr)
 
-        for user in users:
-            if user.is_valid_password(user_pwd):
-                return user
+            for user in users:
+                if user.is_valid_password(user_pwd):
+                    return user
+        except AttributeError:
+            pass
 
         return None
 
