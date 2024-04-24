@@ -8,7 +8,7 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
 from user import Base, User
-from typing import TypeVar, Dict
+from typing import TypeVar, Dict, Any, Union
 
 
 class DB:
@@ -33,7 +33,7 @@ class DB:
             self.__session = DBSession()
         return self.__session
 
-    def add_user(self, email: str, hashed_password: str) -> TypeVar('User'):
+    def add_user(self, email: str, hashed_password: str) -> User:
         """
         The method, which has two required string arguments: email and
         hashed_password, and returns a User object. The method should save the
@@ -48,7 +48,7 @@ class DB:
         self._session.commit()
         return new_user
 
-    def find_user_by(self, **kwargs: Dict) -> TypeVar('User'):
+    def find_user_by(self, **kwargs: Union[int, str]) -> User:
         """
         This method takes in arbitrary keyword arguments and returns the first
         row found in the users table as filtered by the method’s input
@@ -68,7 +68,7 @@ class DB:
             raise NoResultFound
         return user
 
-    def update_user(self, user_id: int, **kwargs: Dict) -> None:
+    def update_user(self, user_id: int, **kwargs: Dict[str, Any]) -> None:
         """
         This method that takes as argument a required user_id integer and
         arbitrary keyword arguments, and returns None.

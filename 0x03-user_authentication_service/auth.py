@@ -7,6 +7,7 @@ from db import DB
 from sqlalchemy.orm.exc import NoResultFound
 from uuid import uuid4
 from typing import Union, TypeVar
+from user import User
 
 
 def _hash_password(password: str) -> bytes:
@@ -34,7 +35,7 @@ class Auth:
     def __init__(self):
         self._db = DB()
 
-    def register_user(self, email, password):
+    def register_user(self, email, password) -> User:
         """
         This method should take mandatory email and password string arguments
         and return a User object.
@@ -102,7 +103,7 @@ class Auth:
         return None
 
     def get_user_from_session_id(self, session_id: str) ->\
-            Union[TypeVar('User'), None]:
+            Union[User, None]:
         """
         This method takes a single session_id string argument and returns the
         corresponding User or None.
@@ -153,6 +154,8 @@ class Auth:
         Otherwise, hash the password and update the user’s hashed_password
         field with the new hashed password and the reset_token field to None.
         """
+        if reset_token is None or password is None:
+            raise ValueError
         try:
             user = self._db.find_user_by(reset_token=reset_token)
         except NoResultFound:
