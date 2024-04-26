@@ -48,7 +48,7 @@ class DB:
         self._session.commit()
         return new_user
 
-    def find_user_by(self, **kwargs: Union[int, str]) -> User:
+    def find_user_by(self, **kwargs) -> User:
         """
         This method takes in arbitrary keyword arguments and returns the first
         row found in the users table as filtered by the method’s input
@@ -68,7 +68,7 @@ class DB:
             raise NoResultFound
         return user
 
-    def update_user(self, user_id: int, **kwargs: Dict[str, Any]) -> None:
+    def update_user(self, user_id: int, **kwargs) -> None:
         """
         This method that takes as argument a required user_id integer and
         arbitrary keyword arguments, and returns None.

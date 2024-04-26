@@ -35,7 +35,7 @@ class Auth:
     def __init__(self):
         self._db = DB()
 
-    def register_user(self, email, password) -> User:
+    def register_user(self, email: str, password: str) -> User:
         """
         This method should take mandatory email and password string arguments
         and return a User object.
@@ -163,3 +163,4 @@ class Auth:
         else:
             h_pwd = _hash_password(password)
             self._db.update_user(user.id, hashed_password=h_pwd)
+            self._db.update_user(user.id, reset_token=None)
